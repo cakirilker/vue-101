@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700,900">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+    <style>
+        body {
+            font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+            font-size: 16px;
+            color: #34495e;
+        }
+
+        #demo,
+        .demo,
+        .content .demo {
+            font-size: 1.2em;
+            line-height: 1.5em;
+        }
+
+        .text-danger {
+            color: red !important;
+            font-weight: bold;
+        }
+
+        .active {
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .static {
+            color: darkslategray;
+        }
+
+        .demo-alert-box {
+            padding: 10px 20px;
+            background: #f3beb8;
+            border: 1px solid #f09898;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <span v-bind:title="message">
+            Hover your mouse over me for a few seconds
+            to see my dynamically bound title!
+        </span>
+        <ol>
+            <li v-for="todo in todos">
+                {{ todo.text }}
+            </li>
+        </ol>
+        <button v-on:click="reverseMessage">Reverse</button>
+        <input v-model="message" />
+        <ol :style="{color: postHeaderColor}">
+            <todo-item v-for="todo in todos" v-bind:todo="todo" v-bind:key="todo.id" v-on:change-text-color="onTextColorChange"></todo-item>
+        </ol>
+        <span v-once>This will never change: {{ message }}</span>
+        <p>Using mustaches: {{ rawHtml }}</p>
+        <p>Using v-html:<span v-html="rawHtml"></span></p>
+        <div v-bind:id="dynamicId">My id is: {{ dynamicId }}</div>
+        <button :disabled="isButtonDisabled">Button</button>
+        <span>Computed reverse message: {{ reversedMessage }}</span>
+        <div>
+            <p>Ask a yes/no question:<input v-model="question"></p>
+            <p>{{ answer }}</p>
+        </div>
+        <div class="static" v-bind:class="{ active: isActive, 'text-danger': hasError }">Inline Object</div>
+        <div v-bind:class="classObject">Class Object</div>
+        <div v-bind:class="computedClassObject">Computed Class Object</div>
+        <div v-bind:class="[activeClass, errorClass]">Array Binding</div>
+
+        <custom-input v-model="firstName"></custom-input>
+        <alert-box>
+            Something went wrong.
+        </alert-box>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+<script>
+    Vue.component('todo-item', {
+        template: `
+        <div>
+        <li>{{ todo.text }}</li>
+        <button @click="$emit('change-text-color')">Change Color</button>
+        </div>`,
+        props: ['todo'],
+        created: function () {
+            // `this` points to the vm instance
+            console.log('a is: ' + this.todo.text)
+        },
+        methods: {
+
+        }
+    })
+    Vue.component('custom-input', {
+        props: ['value'],
+        template: `
+    <input
+      v-bind:value="value"
+      v-on:input="$emit('input', $event.target.value)"
+    >
+  `
+    })
+    Vue.component('alert-box', {
+        template: `
+<div class="demo-alert-box">
+<strong>Error!</strong>
+<slot></slot>
+</div>
+`
+    })
+    app = new Vue({
+        el: '#app',
+        data: {
+            message: 'You loaded this page on ' + new Date().toLocaleString(),
+            todos: [
+                { id: 0, text: 'Learn JavaScript' },
+                { id: 1, text: 'Learn Vue' },
+                { id: 2, text: 'Build something awesome' }
+            ],
+            rawHtml: '<span style="color:red">This should be red.</span>',
+            dynamicId: null,
+            isButtonDisabled: true,
+            firstName: 'Foo',
+            lastName: 'Bar',
+            question: '',
+            answer: 'I cannot give you an answer until you ask a question!',
+            isActive: true,
+            hasError: false,
+            // We can also bind to a computed property that returns an object. This is a common and powerful pattern:
+            classObject: {
+                active: true,
+                'text-danger': false
+            },
+            activeClass: 'active',
+            errorClass: 'text-danger',
+            postHeaderColor: '#000'
+        },
+        mounted: function () {
+            this.dynamicId = this.guid();
+        },
+        // Instead of a computed property, we can define the same function as a method instead. For the end result, the two approaches are indeed exactly the same. However, the difference is that computed properties are cached based on their dependencies.
+        computed: {
+            reversedMessage: function () {
+                return this.message.split('').reverse().join('')
+            },
+            fullName: {
+                get: function () {
+                    return `${this.firstName} ${this.lastName}`
+                },
+                set: function (val) {
+                    var names = val.split(' ');
+                    this.firstName = names[0];
+                    this.lastName = names[names.length - 1];
+                }
+            },
+            computedClassObject: function () {
+                return {
+                    active: this.isActive && !this.hasError,
+                    'text-danger': this.hasError
+                }
+            }
+        },
+        // This is most useful when you want to perform asynchronous or expensive operations in response to changing data.
+        watch: {
+            question: function (newQuestion, oldQuestion) {
+                this.answer = 'Waiting for you to stop typing...';
+                this.debouncedGetAnswer();
+            }
+        },
+        created: function () {
+            // _.debounce is a function provided by lodash to limit how
+            // often a particularly expensive operation can be run.
+            // In this case, we want to limit how often we access
+            // yesno.wtf/api, waiting until the user has completely
+            // finished typing before making the ajax request.
+            this.debouncedGetAnswer = _.debounce(this.getAnswer, 500);
+        },
+        methods: {
+            reverseMessage: function () {
+                this.message = this.message.split('').reverse().join('');
+            },
+            guid: function guid() {
+                function s4() {
+                    return Math.floor((1 + Math.random()) * 0x10000)
+                        .toString(16)
+                        .substring(1);
+                }
+                return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+            },
+            getAnswer: function () {
+                if (this.question.indexOf('?') === -1) {
+                    this.answer = 'Questions usually contain a question mark. ;-)';
+                    return;
+                }
+                this.answer = 'Thinking...';
+                var vm = this;
+                axios.get('https://yesno.wtf/api')
+                    .then(function (response) {
+                        vm.answer = _.capitalize(response.data.answer);
+                    })
+                    .catch(function (error) {
+                        vm.answer = `Error: ${error}`;
+                    });
+            },
+            // Communication with parents with events
+            // https://vuejs.org/v2/guide/components.html#Sending-Messages-to-Parents-with-Events
+            onTextColorChange: function () {
+                this.postHeaderColor = this.randomHexColor();
+            },
+            randomHexColor: function () {
+                return "#000000".replace(/0/g, function () { return (~~(Math.random() * 16)).toString(16); });
+            }
+        }
+    })
+</script>
+
+</html>
