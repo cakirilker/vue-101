@@ -1,4 +1,5 @@
-# vuex-app
+# vuex-typescript-app
+Gettings started with vuex with TypeScript.
 
 ## Project setup
 ```
