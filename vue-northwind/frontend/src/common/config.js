@@ -1,0 +1,1 @@
+export default { API_URL: "http://192.168.2.41:5000/api" }
