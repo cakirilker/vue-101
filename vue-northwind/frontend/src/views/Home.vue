@@ -5,7 +5,6 @@
       <strong>fluid</strong>: it will have a 32px gap on either side, on any
       viewport size.
     </div>
-    <!-- <button class="button is-primary" slot="trigger">Click me!</button> -->
     <OrderList/>
   </div>
 </template>

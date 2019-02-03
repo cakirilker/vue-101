@@ -7,7 +7,9 @@ import "buefy/dist/buefy.css";
 
 import ApiService from "@/common/api.service";
 
-Vue.use(Buefy);
+Vue.use(Buefy, {
+  defaultIconPack: "mdi"
+});
 
 Vue.config.productionTip = false;
 
