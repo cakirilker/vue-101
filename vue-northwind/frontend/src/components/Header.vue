@@ -2,7 +2,7 @@
   <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item" href="https://bulma.io">
-        <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28">
+        <!-- <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28"> -->
       </a>
       <a
         role="button"
@@ -21,6 +21,7 @@
       <div class="navbar-start">
         <router-link class="navbar-item" :to="{name:'home'}">Home</router-link>
         <router-link class="navbar-item" :to="{name:'about'}">About</router-link>
+        <router-link class="navbar-item" :to="{name:'products'}">Products</router-link>
       </div>
     </div>
   </nav>

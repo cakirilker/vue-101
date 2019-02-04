@@ -8,7 +8,8 @@ import {
 } from "@/store/mutations.type";
 
 const initialState = {
-    orders: []
+    orders: [],
+    isLoading: true
 }
 
 export const state = { ...initialState }
@@ -28,15 +29,20 @@ export const actions = {
 
 export const mutations = {
     [FETCH_START](state) {
+        state.isLoading = true;
     },
     [FETCH_END](state, orders) {
         state.orders = orders;
+        state.isLoading = false;
     }
 }
 
 export const getters = {
     orders(state) {
         return state.orders;
+    },
+    isLoading(state) {
+        return state.isLoading;
     }
 }
 

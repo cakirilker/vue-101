@@ -1,11 +1,10 @@
 import Vue from "vue";
 import axios from "axios";
-import VueAxios from "vue-axios"
-import config from "@/common/config"
+import VueAxios from "vue-axios";
+import config from "@/common/config";
 
 const ApiService = {
     init() {
-        console.log(config);
         Vue.use(VueAxios, axios);
         Vue.axios.defaults.baseURL = config.API_URL
     },
@@ -13,11 +12,19 @@ const ApiService = {
 export default ApiService
 
 export const OrdersService = {
-    get() {
-        console.log(`${Vue.axios.defaults.baseURL}/orders`)
-        return Vue.axios.get(`/orders`)
-            .catch(error => {
-                throw new Error(`Error ${error}`)
-            })
+    async get() {
+        try {
+            return Vue.axios.get(`/orders`);
+        }
+        catch (error) {
+            throw new Error(`Error ${error}`);
+        }
     },
+    async getOrder(id) {
+        try {
+            return Vue.axios.get(`/orders/${id}`);
+        } catch (error) {
+            throw new Error(`Error ${error}`);
+        }
+    }
 }

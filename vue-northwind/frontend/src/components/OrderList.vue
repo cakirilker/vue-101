@@ -1,11 +1,7 @@
 <template>
-  <div v-if="orders.length">
+  <div>
     <section>
       <b-field grouped group-multiline>
-        <b-select v-model="defaultSortDirection">
-          <option value="asc">Default sort direction: ASC</option>
-          <option value="desc">Default sort direction: DESC</option>
-        </b-select>
         <b-select v-model="perPage" :disabled="!isPaginated">
           <option value="5">5 per page</option>
           <option value="10">10 per page</option>
@@ -15,12 +11,12 @@
       </b-field>
     </section>
     <b-table
-      :data="orders"
+      :data="orders.length == 0 ? [] : orders"
       :paginated="isPaginated"
+      :loading="isLoading"
       :per-page="perPage"
       :current-page.sync="currentPage"
       :pagination-simple="isPaginationSimple"
-      :default-sort-direction="defaultSortDirection"
       default-sort="customerId"
       ref="table"
       detailed
@@ -53,70 +49,20 @@
         </b-table-column>
         <b-table-column field="freight" label="Freight" sortable numeric>{{props.row.freight}}</b-table-column>
       </template>
-      <template slot="detail" slot-scope="props">
-        <div class="columns">
-          <div class="column is-1">
-            <p class="image is-64x64">
-              <img src="/static/img/placeholder-128x128.png">
-            </p>
-          </div>
-          <div class="column is-11">
-            <div class="columns is-multiline is-mobile">
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-              <div class="column is-half">
-                <code>is-half</code>
-              </div>
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-              <div class="column is-one-quarter">
-                <code>is-one-quarter</code>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- <article class="media">
-          <figure class="media-left">
-            <p class="image is-64x64">
-              <img src="/static/img/placeholder-128x128.png">
-            </p>
-          </figure>
-          <div class="media-content">
-            <div class="content">
-              <div>
-                <span>
-                  Shipped Date:
-                  <strong>{{ new Date(props.row.shippedDate).toLocaleDateString() }}</strong>
-                  <small>@{{ props.row.employeeId }}</small>
-                </span>
-                <div>Address: {{ `${props.row.shipAddress} ${props.row.shipCity} ${props.row.shipCountry}`}}</div>
-              </div>
-            </div>
-          </div>
-        </article>-->
-      </template>
+      <OrderDetail slot="detail" slot-scope="{row}" :row="row"/>
     </b-table>
   </div>
-
-  <div v-else>Loading...</div>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-import { FETCH_ORDERS } from "@/store/actions.type";
+import { FETCH_ORDERS, FETCH_ORDER } from "@/store/actions.type";
+import OrderDetail from "@/components/OrderDetail";
 export default {
   name: "OrderList",
+  components: {
+    OrderDetail
+  },
   data() {
     return {
       isPaginated: true,
@@ -132,15 +78,19 @@ export default {
     this.fetchOrders();
   },
   computed: {
-    ...mapGetters(["orders"])
+    ...mapGetters(["orders", "isLoading"])
   },
   methods: {
     fetchOrders() {
       this.$store.dispatch(FETCH_ORDERS);
     },
+    fetchOrder(id) {
+      this.$store.dispatch(FETCH_ORDER, id);
+    },
     toggleOrderDetails(row, index) {
       this.defaultOpenedDetails = [row.orderId];
       this.$refs.table.toggleDetails(row);
+      this.fetchOrder(row.orderId);
       this.$toast.open({
         message: `Order Selected: ${row.orderId}`,
         type: "is-success"

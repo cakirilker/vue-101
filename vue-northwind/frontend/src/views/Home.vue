@@ -1,11 +1,16 @@
 <template>
-  <div class="container is-fluid">
-    <div class="notification">
-      This container is
-      <strong>fluid</strong>: it will have a 32px gap on either side, on any
-      viewport size.
+  <div>
+    <section class="hero is-small is-primary is-bold">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title">Orders</h1>
+          <h2 class="subtitle">List of orders</h2>
+        </div>
+      </div>
+    </section>
+    <div class="container is-fluid">
+      <OrderList class="orders-container"/>
     </div>
-    <OrderList/>
   </div>
 </template>
 
@@ -21,3 +26,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+.orders-container {
+  margin-top: 20px;
+}
+</style>
